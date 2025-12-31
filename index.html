@@ -1349,7 +1349,21 @@
             sizeComparison.textContent = '';
             developmentList.innerHTML = '';
 
+            try {
+                // Call serverless API endpoint
+                const response = await fetch('/api/baby-development', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        weeks: weeks,
+                        days: days,
+                        language: currentLanguage
+                    })
+                });
 
+                const babyData = await response.json();
 
                 // Update UI with AI-generated data
                 babyIcon.textContent = babyData.icon || '👶';
@@ -1467,7 +1481,20 @@
             exerciseIntro.innerHTML = '<div class="loading-text"><div class="loading-spinner"></div> Loading exercise recommendations...</div>';
             exerciseList.innerHTML = '';
 
+            try {
+                const response = await fetch('/api/exercise-recommendations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        weeks: weeks,
+                        days: days,
+                        language: currentLanguage
+                    })
+                });
 
+                const exerciseData = await response.json();
 
                 // Update intro
                 exerciseIntro.textContent = exerciseData.intro;
