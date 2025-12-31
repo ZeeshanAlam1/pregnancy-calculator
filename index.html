@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculate Pregnancy Week</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e91e63;
+            --primary-dark: #c2185b;
+            --secondary: #f8bbd0;
+            --accent: #9c27b0;
+            --text-dark: #2d2d2d;
+            --text-light: #6b6b6b;
+            --bg-cream: #fce4ec;
+            --bg-white: #ffffff;
+            --shadow: rgba(233, 30, 99, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: linear-gradient(135deg, var(--bg-cream) 0%, #f3e5f5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-dark);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(233, 30, 99, 0.08) 0%, transparent 70%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: 
+                0 20px 60px var(--shadow),
+                0 0 0 1px rgba(233, 30, 99, 0.1);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 45px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            box-shadow: 0 10px 30px rgba(233, 30, 99, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-dark);
+            letter-spacing: 0.3px;
+        }
+
+        input[type="date"] {
+            display: none;
+        }
+
+        .date-picker-container {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Source Sans Pro', sans-serif;
+            color: var(--text-dark);
+            background: var(--bg-white);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        .date-picker-container:hover {
+            border-color: var(--primary-dark);
+        }
+
+        .date-picker-container.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.1);
+        }
+
+        .date-display {
+            flex: 1;
+            color: var(--text-light);
+        }
+
+        .date-display.selected {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .calendar-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.5;
+        }
+
+        .custom-date-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .custom-date-modal.show {
+            display: flex;
+        }
+
+        .date-picker-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+            overflow: hidden;
+        }
+
+        .date-picker-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .date-picker-header h3 {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .date-picker-body {
+            padding: 24px;
+        }
+
+        .date-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .date-input-wrapper {
+            flex: 1;
+            text-align: center;
+        }
+
+        .date-input-wrapper.month-wrapper {
+            flex: 1.3;
+        }
+
+        .date-input-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--secondary);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-weight: 600;
+            color: var(--text-dark);
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.2s ease;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .date-input::placeholder {
+            color: #ccc;
+        }
+
+        select.date-input {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 30px;
+        }
+
+        select.date-input option {
+            padding: 10px;
+        }
+
+        .date-picker-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .date-picker-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .date-picker-btn.cancel {
+            background: #f0f0f0;
+            color: var(--text-dark);
+        }
+
+        .date-picker-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .date-picker-btn.confirm {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .date-picker-btn.confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            font-family: 'Source Sans Pro', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
+            letter-spacing: 0.5px;
+            animation: fadeIn 0.8s ease-out 0.6s both;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(233, 30, 99, 0.4);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+            animation: slideIn 0.5s ease-out;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .result-title {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .result-detail {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(233, 30, 99, 0.2);
+        }
+
+        .result-detail:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .result-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-family: 'Source Sans Pro', sans-serif;
+        }
+
+        .error {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff0ed;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            color: var(--accent);
+            font-size: 0.95rem;
+            display: none;
+            animation: shake 0.5s ease-out;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .info-text {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(233, 30, 99, 0.05);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            animation: fadeIn 0.8s ease-out 0.8s both;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .language-btn {
+            background: white;
+            border: 2px solid var(--secondary);
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.1);
+        }
+
+        .language-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(233, 30, 99, 0.2);
+        }
+
+        .language-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            min-width: 150px;
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .language-dropdown.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .language-option {
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-option:hover {
+            background: var(--bg-cream);
+        }
+
+        .language-option.active {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--bg-cream) 100%);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        /* RTL Support */
+        [dir="rtl"] {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .language-selector {
+            right: auto;
+            left: 20px;
+        }
+
+        [dir="rtl"] .language-dropdown {
+            right: auto;
+            left: 0;
+        }
+
+        [dir="rtl"] .date-input-group {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .date-input {
+            text-align: right;
+        }
+
+        [dir="rtl"] .month-select {
+            text-align: right;
+        }
+
+        [dir="rtl"] .result-detail {
+            flex-direction: row-reverse;
+        }
+
+        @media (max-width: 600px) {
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+
+            [dir="rtl"] .language-selector {
+                right: auto;
+                left: 10px;
+            }
+
+            .language-btn {
+                padding: 8px 14px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .baby-growth {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffffff 0%, #fce4ec 100%);
+            border-radius: 16px;
+            border: 2px solid var(--secondary);
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .baby-growth.show {
+            display: block;
+        }
+
+        .baby-growth-title {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .baby-illustration {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .baby-icon {
+            font-size: 120px;
+            line-height: 1;
+            animation: gentle-float 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes gentle-float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .baby-size {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.1);
+        }
+
+        .size-item {
+            text-align: center;
+        }
+
+        .size-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .size-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .size-divider {
+            width: 1px;
+            height: 40px;
+            background: var(--secondary);
+        }
+
+        .baby-description {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .baby-description h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .baby-description p {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .development-highlights {
+            margin-top: 15px;
+        }
+
+        .development-highlights ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .development-highlights li {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            line-height: 1.8;
+            margin-bottom: 8px;
+        }
+
+        .comparison {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fce4ec;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-top: 10px;
+        }
+
+        /* Exercise Recommendations */
+        .exercise-section {
+            margin-top: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #fff9f4 0%, #fce4ec 100%);
+            border-radius: 16px;
+            border-left: 4px solid var(--accent);
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .exercise-section.show {
+            display: block;
+        }
+
+        .exercise-title {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exercise-intro {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .exercise-list {
+            margin-top: 15px;
+        }
+
+        .exercise-item {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(233, 30, 99, 0.08);
+            transition: transform 0.2s ease;
+        }
+
+        .exercise-item:hover {
+            transform: translateX(5px);
+        }
+
+        [dir="rtl"] .exercise-item:hover {
+            transform: translateX(-5px);
+        }
+
+        .exercise-item-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exercise-item-description {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .exercise-item-benefits {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .exercise-warning {
+            background: #fff0ed;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        [dir="rtl"] .exercise-warning {
+            border-left: none;
+            border-right: 3px solid var(--accent);
+        }
+
+        .exercise-warning strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(233, 30, 99, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-light);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 25px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .icon {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+
+            .result-value {
+                font-size: 1.15rem;
+            }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px 20px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .footer-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .footer-heart {
+            color: var(--primary);
+            font-size: 1.2rem;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.1); }
+            20%, 40% { transform: scale(1); }
+        }
+
+        .footer-name {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        @media (max-width: 600px) {
+            .footer {
+                margin-top: 30px;
+                padding: 20px 15px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button class="language-btn" onclick="toggleLanguageDropdown()">
+            <span id="currentLangFlag">🇬🇧</span>
+            <span id="currentLangName">English</span>
+            <span>▼</span>
+        </button>
+        <div class="language-dropdown" id="languageDropdown">
+            <div class="language-option active" onclick="changeLanguage('en')">
+                <span>🇬🇧</span>
+                <span>English</span>
+            </div>
+            <div class="language-option" onclick="changeLanguage('hi')">
+                <span>🇮🇳</span>
+                <span>हिंदी</span>
+            </div>
+            <div class="language-option" onclick="changeLanguage('ar')">
+                <span>🇸🇦</span>
+                <span>العربية</span>
+            </div>
+            <div class="language-option" onclick="changeLanguage('ur')">
+                <span>🇵🇰</span>
+                <span>اردو</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="icon">🤰</div>
+            <h1>Calculate Pregnancy Week</h1>
+            <p class="subtitle">Track your pregnancy journey with ease</p>
+        </div>
+
+        <div class="form-group">
+            <label for="lmp-date">Last Menstrual Period (LMP) Date</label>
+            <input type="date" id="lmp-date" max="">
+            <div class="date-picker-container" id="datePickerTrigger">
+                <span class="date-display" id="dateDisplay">Select date</span>
+                <svg class="calendar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculatePregnancy()">Calculate Pregnancy Week</button>
+
+        <div class="result" id="result">
+            <h2 class="result-title">Your Pregnancy Details</h2>
+            <div class="result-detail">
+                <span class="result-label">Pregnancy Progress</span>
+                <span class="result-value" id="weeks">—</span>
+            </div>
+            <div class="result-detail">
+                <span class="result-label">Days Pregnant</span>
+                <span class="result-value" id="days">—</span>
+            </div>
+            <div class="result-detail">
+                <span class="result-label">Trimester</span>
+                <span class="result-value" id="trimester">—</span>
+            </div>
+            <div class="result-detail">
+                <span class="result-label">Estimated Due Date</span>
+                <span class="result-value" id="due-date">—</span>
+            </div>
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="baby-growth" id="babyGrowth">
+            <h2 class="baby-growth-title">Your Baby's Development</h2>
+            <div class="ai-badge">
+                <span>✨</span>
+                <span>AI-Powered Insights</span>
+            </div>
+            
+            <div class="baby-illustration">
+                <div class="baby-icon" id="babyIcon">👶</div>
+            </div>
+
+            <div class="baby-size">
+                <div class="size-item">
+                    <div class="size-label">Length</div>
+                    <div class="size-value" id="babyLength">—</div>
+                </div>
+                <div class="size-divider"></div>
+                <div class="size-item">
+                    <div class="size-label">Weight</div>
+                    <div class="size-value" id="babyWeight">—</div>
+                </div>
+            </div>
+
+            <div class="baby-description">
+                <h4 id="growthTitle">Baby Development</h4>
+                <p id="growthDescription"></p>
+                <div class="comparison" id="sizeComparison"></div>
+                <div class="development-highlights">
+                    <strong id="keyDevelopmentsLabel">Key Developments:</strong>
+                    <ul id="developmentList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="exercise-section" id="exerciseSection">
+            <h2 class="exercise-title">
+                <span>🧘‍♀️</span>
+                <span id="exerciseTitle">Recommended Exercises</span>
+            </h2>
+            <p class="exercise-intro" id="exerciseIntro"></p>
+            <div class="exercise-list" id="exerciseList"></div>
+            <div class="exercise-warning">
+                <strong id="exerciseWarningTitle">⚠️ Important:</strong>
+                <span id="exerciseWarningText">Always consult with your healthcare provider before starting any exercise routine during pregnancy. Stop immediately if you experience pain, dizziness, or unusual symptoms.</span>
+            </div>
+        </div>
+
+        <div class="info-text">
+            <strong>Note:</strong> Pregnancy is calculated from the first day of your last menstrual period. A typical pregnancy lasts about 40 weeks (280 days). This calculator provides an estimate and should not replace medical advice.
+        </div>
+
+        <!-- Footer -->
+        <div class="footer" dir="ltr">
+            <div class="footer-text">
+                <span>Made with</span>
+                <span class="footer-heart">❤️</span>
+                <span>by</span>
+                <span class="footer-name">Zeeshan</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Date Picker Modal -->
+    <div class="custom-date-modal" id="dateModal">
+        <div class="date-picker-modal">
+            <div class="date-picker-header">
+                <h3>Select LMP Date</h3>
+            </div>
+            <div class="date-picker-body">
+                <div class="date-input-group" id="dateInputGroup">
+                    <div class="date-input-wrapper" id="dayWrapper">
+                        <div class="date-input-label" id="dayLabel">Day</div>
+                        <input type="number" class="date-input" id="dayInput" placeholder="DD" min="1" max="31">
+                    </div>
+                    <div class="date-input-wrapper month-wrapper" id="monthWrapper">
+                        <div class="date-input-label" id="monthLabel">Month</div>
+                        <select class="date-input" id="monthInput">
+                            <option value="">Select</option>
+                            <option value="1">JAN</option>
+                            <option value="2">FEB</option>
+                            <option value="3">MAR</option>
+                            <option value="4">APR</option>
+                            <option value="5">MAY</option>
+                            <option value="6">JUN</option>
+                            <option value="7">JUL</option>
+                            <option value="8">AUG</option>
+                            <option value="9">SEP</option>
+                            <option value="10">OCT</option>
+                            <option value="11">NOV</option>
+                            <option value="12">DEC</option>
+                        </select>
+                    </div>
+                    <div class="date-input-wrapper" id="yearWrapper">
+                        <div class="date-input-label" id="yearLabel">Year</div>
+                        <input type="number" class="date-input" id="yearInput" placeholder="YYYY" min="1900" max="2100">
+                    </div>
+                </div>
+                <div class="date-picker-actions">
+                    <button class="date-picker-btn cancel" onclick="closeDatePicker()">Cancel</button>
+                    <button class="date-picker-btn confirm" onclick="confirmDate()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set max date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('lmp-date').setAttribute('max', today);
+
+        // Custom Date Picker Functionality
+        const datePickerTrigger = document.getElementById('datePickerTrigger');
+        const dateModal = document.getElementById('dateModal');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const monthInput = document.getElementById('monthInput');
+        const dayInput = document.getElementById('dayInput');
+        const yearInput = document.getElementById('yearInput');
+        const lmpDateInput = document.getElementById('lmp-date');
+
+        // Open date picker
+        datePickerTrigger.addEventListener('click', function() {
+            dateModal.classList.add('show');
+            datePickerTrigger.classList.add('active');
+            
+            // Pre-fill with current date if no date selected
+            const currentDate = lmpDateInput.value ? new Date(lmpDateInput.value) : new Date();
+            dayInput.value = currentDate.getDate();
+            monthInput.value = currentDate.getMonth() + 1;
+            yearInput.value = currentDate.getFullYear();
+            
+            dayInput.focus();
+        });
+
+        // Close date picker when clicking outside
+        dateModal.addEventListener('click', function(e) {
+            if (e.target === dateModal) {
+                closeDatePicker();
+            }
+        });
+
+        function closeDatePicker() {
+            dateModal.classList.remove('show');
+            datePickerTrigger.classList.remove('active');
+        }
+
+        function confirmDate() {
+            const day = parseInt(dayInput.value);
+            const month = parseInt(monthInput.value);
+            const year = parseInt(yearInput.value);
+            const t = translations[currentLanguage];
+
+            // Validate inputs
+            if (!day || !month || !year) {
+                alert(t.errorFillAll);
+                return;
+            }
+
+            if (month < 1 || month > 12) {
+                alert(t.errorInvalidMonth);
+                return;
+            }
+
+            if (day < 1 || day > 31) {
+                alert(t.errorInvalidDay);
+                return;
+            }
+
+            if (year < 1900 || year > new Date().getFullYear()) {
+                alert(t.errorInvalidYear);
+                return;
+            }
+
+            // Create date string
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const selectedDate = new Date(dateStr);
+
+            // Validate that it's a valid date
+            if (isNaN(selectedDate.getTime())) {
+                alert(t.errorInvalidDate);
+                return;
+            }
+
+            // Check if date is in the future
+            if (selectedDate > new Date()) {
+                alert(t.errorFutureDate);
+                return;
+            }
+
+            // Update hidden input
+            lmpDateInput.value = dateStr;
+
+            // Update display with localized date format
+            let displayDate;
+            if (currentLanguage === 'en') {
+                displayDate = selectedDate.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (currentLanguage === 'hi') {
+                displayDate = selectedDate.toLocaleDateString('hi-IN', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (currentLanguage === 'ar') {
+                displayDate = selectedDate.toLocaleDateString('ar-SA', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (currentLanguage === 'ur') {
+                displayDate = selectedDate.toLocaleDateString('ur-PK', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+            
+            dateDisplay.textContent = displayDate;
+            dateDisplay.classList.add('selected');
+
+            closeDatePicker();
+        }
+
+        // Handle Enter key in date inputs
+        [monthInput, dayInput, yearInput].forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    confirmDate();
+                }
+            });
+        });
+
+        // Auto-advance to next field
+        dayInput.addEventListener('input', function() {
+            if (this.value.length === 2) monthInput.focus();
+        });
+
+        monthInput.addEventListener('change', function() {
+            yearInput.focus();
+        });
+
+        async function calculatePregnancy() {
+            const lmpInput = document.getElementById('lmp-date').value;
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            const t = translations[currentLanguage];
+
+            // Hide previous results
+            resultDiv.classList.remove('show');
+            errorDiv.classList.remove('show');
+
+            if (!lmpInput) {
+                errorDiv.textContent = t.errorNoDate;
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            const lmpDate = new Date(lmpInput);
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            lmpDate.setHours(0, 0, 0, 0);
+
+            // Validate that LMP is not in the future
+            if (lmpDate > currentDate) {
+                errorDiv.textContent = t.errorFutureDate;
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Calculate difference in days
+            const timeDiff = currentDate - lmpDate;
+            const totalDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+
+            // Validate reasonable pregnancy duration (0-42 weeks)
+            if (totalDays > 294) {
+                errorDiv.textContent = t.errorTooLong;
+                errorDiv.classList.add('show');
+                return;
+            }
+
+            // Calculate weeks and remaining days
+            const weeks = Math.floor(totalDays / 7);
+            const days = totalDays % 7;
+
+            // Calculate trimester
+            let trimester;
+            if (weeks <= 13) {
+                trimester = t.first;
+            } else if (weeks <= 26) {
+                trimester = t.second;
+            } else {
+                trimester = t.third;
+            }
+
+            // Calculate estimated due date (280 days from LMP)
+            const dueDate = new Date(lmpDate);
+            dueDate.setDate(dueDate.getDate() + 280);
+            
+            // Format date according to language
+            let dueDateFormatted;
+            if (currentLanguage === 'en') {
+                dueDateFormatted = dueDate.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (currentLanguage === 'hi') {
+                dueDateFormatted = dueDate.toLocaleDateString('hi-IN', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (currentLanguage === 'ar') {
+                dueDateFormatted = dueDate.toLocaleDateString('ar-SA', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } else if (currentLanguage === 'ur') {
+                dueDateFormatted = dueDate.toLocaleDateString('ur-PK', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+
+            // Display results
+            const weeksText = days === 0 ? `${weeks} ${t.weeks}` : 
+                             days === 1 ? `${weeks} ${t.weeks} ${days} ${t.day}` : 
+                             `${weeks} ${t.weeks} ${days} ${t.days}`;
+            document.getElementById('weeks').textContent = weeksText;
+            document.getElementById('days').textContent = `${totalDays} ${t.days}`;
+            document.getElementById('trimester').textContent = trimester;
+            document.getElementById('due-date').textContent = dueDateFormatted;
+
+            resultDiv.classList.add('show');
+
+            // Show baby growth information using AI
+            await showBabyGrowthWithAI(weeks, days);
+        }
+
+        async function showBabyGrowthWithAI(weeks, days) {
+            const babyGrowthDiv = document.getElementById('babyGrowth');
+            const babyIcon = document.getElementById('babyIcon');
+            const babyLength = document.getElementById('babyLength');
+            const babyWeight = document.getElementById('babyWeight');
+            const growthTitle = document.getElementById('growthTitle');
+            const growthDescription = document.getElementById('growthDescription');
+            const sizeComparison = document.getElementById('sizeComparison');
+            const developmentList = document.getElementById('developmentList');
+            const t = translations[currentLanguage];
+
+            // Show the section with loading state
+            babyGrowthDiv.classList.add('show');
+            
+            // Set loading states
+            babyIcon.textContent = '⏳';
+            babyLength.textContent = '...';
+            babyWeight.textContent = '...';
+            growthTitle.textContent = t.loading;
+            growthDescription.innerHTML = `<div class="loading-text"><div class="loading-spinner"></div> ${t.loadingDetails}</div>`;
+            sizeComparison.textContent = '';
+            developmentList.innerHTML = '';
+
+            try {
+                // Call Anthropic API to get baby development information
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 1000,
+                        messages: [
+                            {
+                                role: "user",
+                                content: `You are a prenatal development expert. Provide detailed information about fetal development at ${weeks} weeks and ${days} days of pregnancy.
+
+IMPORTANT: Respond in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi (Devanagari script)' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'} language.
+
+Please respond ONLY with a JSON object (no markdown, no backticks, no preamble) with this exact structure:
+{
+  "icon": "single emoji representing the baby at this stage",
+  "length": "length in cm or mm as string with unit in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}",
+  "weight": "weight in grams as string with unit in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}",
+  "comparison": "comparison to a fruit/vegetable with emoji and text in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'} (e.g., '🍋 Lemon' or '🍋 नींबू' for Hindi)",
+  "title": "Week X: Brief descriptive title in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}",
+  "description": "2-3 sentence description of what's happening this week in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}",
+  "developments": ["development 1 in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}", "development 2", "development 3", "development 4"]
+}
+
+Be medically accurate and supportive in tone. The developments array should have 4-5 key milestones. All text must be in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi (using Devanagari script)' : currentLanguage === 'ar' ? 'Arabic (using Arabic script)' : 'Urdu (using Urdu/Arabic script)'}.`
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Extract text from response
+                const responseText = data.content
+                    .filter(block => block.type === 'text')
+                    .map(block => block.text)
+                    .join('\n')
+                    .trim();
+
+                // Parse JSON response
+                const babyData = JSON.parse(responseText);
+
+                // Update UI with AI-generated data
+                babyIcon.textContent = babyData.icon || '👶';
+                babyLength.textContent = babyData.length || '—';
+                babyWeight.textContent = babyData.weight || '—';
+                growthTitle.textContent = babyData.title || `Week ${weeks}`;
+                growthDescription.textContent = babyData.description || '';
+                sizeComparison.textContent = babyData.comparison || '';
+
+                // Populate development list
+                developmentList.innerHTML = '';
+                if (babyData.developments && Array.isArray(babyData.developments)) {
+                    babyData.developments.forEach(dev => {
+                        const li = document.createElement('li');
+                        li.textContent = dev;
+                        developmentList.appendChild(li);
+                    });
+                }
+
+                babyGrowthDiv.classList.add('show');
+
+                // Fetch exercise recommendations
+                await getExerciseRecommendations(weeks, days);
+
+            } catch (error) {
+                console.error('Error fetching baby development data:', error);
+                
+                // Fallback to basic information with translations
+                const fallbackData = {
+                    en: {
+                        icon: '👶',
+                        title: `Week ${weeks}: Baby Development`,
+                        description: `At ${weeks} weeks and ${days} days, your baby is growing and developing rapidly. Each week brings new milestones!`,
+                        length: 'Varies',
+                        weight: 'Varies',
+                        comparison: '🤱 Growing strong',
+                        developments: [
+                            'Organs are developing and maturing',
+                            'Brain is forming neural connections',
+                            'Baby is active and growing',
+                            'Preparing for life outside the womb'
+                        ]
+                    },
+                    hi: {
+                        icon: '👶',
+                        title: `सप्ताह ${weeks}: बच्चे का विकास`,
+                        description: `${weeks} सप्ताह और ${days} दिन पर, आपका बच्चा तेजी से बढ़ रहा है और विकसित हो रहा है। प्रत्येक सप्ताह नए मील के पत्थर लाता है!`,
+                        length: 'भिन्न होता है',
+                        weight: 'भिन्न होता है',
+                        comparison: '🤱 मजबूत हो रहा है',
+                        developments: [
+                            'अंग विकसित और परिपक्व हो रहे हैं',
+                            'मस्तिष्क तंत्रिका कनेक्शन बना रहा है',
+                            'बच्चा सक्रिय है और बढ़ रहा है',
+                            'गर्भ के बाहर जीवन के लिए तैयारी कर रहा है'
+                        ]
+                    },
+                    ar: {
+                        icon: '👶',
+                        title: `الأسبوع ${weeks}: نمو الطفل`,
+                        description: `في ${weeks} أسبوعًا و ${days} أيام، ينمو طفلك ويتطور بسرعة. كل أسبوع يجلب معالم جديدة!`,
+                        length: 'يختلف',
+                        weight: 'يختلف',
+                        comparison: '🤱 ينمو بقوة',
+                        developments: [
+                            'الأعضاء تتطور وتنضج',
+                            'الدماغ يشكل الروابط العصبية',
+                            'الطفل نشط وينمو',
+                            'يستعد للحياة خارج الرحم'
+                        ]
+                    },
+                    ur: {
+                        icon: '👶',
+                        title: `ہفتہ ${weeks}: بچے کی نشوونما`,
+                        description: `${weeks} ہفتے اور ${days} دن پر، آپ کا بچہ تیزی سے بڑھ رہا ہے اور ترقی کر رہا ہے۔ ہر ہفتہ نئے سنگ میل لاتا ہے!`,
+                        length: 'مختلف ہوتا ہے',
+                        weight: 'مختلف ہوتا ہے',
+                        comparison: '🤱 مضبوط ہو رہا ہے',
+                        developments: [
+                            'اعضاء ترقی اور پختہ ہو رہے ہیں',
+                            'دماغ اعصابی روابط بنا رہا ہے',
+                            'بچہ فعال ہے اور بڑھ رہا ہے',
+                            'رحم سے باہر زندگی کے لیے تیاری کر رہا ہے'
+                        ]
+                    }
+                };
+
+                const fallback = fallbackData[currentLanguage];
+                babyIcon.textContent = fallback.icon;
+                growthTitle.textContent = fallback.title;
+                growthDescription.textContent = fallback.description;
+                babyLength.textContent = fallback.length;
+                babyWeight.textContent = fallback.weight;
+                sizeComparison.textContent = fallback.comparison;
+                
+                developmentList.innerHTML = '';
+                fallback.developments.forEach(dev => {
+                    const li = document.createElement('li');
+                    li.textContent = dev;
+                    developmentList.appendChild(li);
+                });
+
+                babyGrowthDiv.classList.add('show');
+            }
+        }
+
+        async function getExerciseRecommendations(weeks, days) {
+            const exerciseSection = document.getElementById('exerciseSection');
+            const exerciseIntro = document.getElementById('exerciseIntro');
+            const exerciseList = document.getElementById('exerciseList');
+            const t = translations[currentLanguage];
+
+            // Show section with loading state
+            exerciseSection.classList.add('show');
+            exerciseIntro.innerHTML = '<div class="loading-text"><div class="loading-spinner"></div> Loading exercise recommendations...</div>';
+            exerciseList.innerHTML = '';
+
+            try {
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 1500,
+                        messages: [
+                            {
+                                role: "user",
+                                content: `You are a prenatal fitness expert. Provide safe exercise recommendations for a pregnant woman at ${weeks} weeks and ${days} days of pregnancy.
+
+IMPORTANT: Respond in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi (Devanagari script)' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'} language.
+
+Please respond ONLY with a JSON object (no markdown, no backticks, no preamble) with this exact structure:
+{
+  "intro": "Brief introduction about exercise at this stage in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'} (2-3 sentences)",
+  "exercises": [
+    {
+      "name": "Exercise name in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}",
+      "emoji": "relevant emoji",
+      "description": "How to do it in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}",
+      "benefits": "Benefits in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'ar' ? 'Arabic' : 'Urdu'}"
+    }
+  ]
+}
+
+Provide 4-5 safe exercises appropriate for ${weeks} weeks of pregnancy. Consider trimester-specific needs:
+- First trimester (1-13 weeks): Focus on gentle exercises, avoiding overheating
+- Second trimester (14-27 weeks): More energy, can do moderate exercises
+- Third trimester (28+ weeks): Focus on comfort, balance, and preparation for labor
+
+All text must be in ${currentLanguage === 'en' ? 'English' : currentLanguage === 'hi' ? 'Hindi (Devanagari script)' : currentLanguage === 'ar' ? 'Arabic (Arabic script)' : 'Urdu (Urdu/Arabic script)'}.`
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                const responseText = data.content
+                    .filter(block => block.type === 'text')
+                    .map(block => block.text)
+                    .join('\n')
+                    .trim();
+
+                const exerciseData = JSON.parse(responseText);
+
+                // Update intro
+                exerciseIntro.textContent = exerciseData.intro;
+
+                // Update exercise list
+                exerciseList.innerHTML = '';
+                exerciseData.exercises.forEach(exercise => {
+                    const exerciseItem = document.createElement('div');
+                    exerciseItem.className = 'exercise-item';
+                    exerciseItem.innerHTML = `
+                        <div class="exercise-item-title">
+                            <span>${exercise.emoji}</span>
+                            <span>${exercise.name}</span>
+                        </div>
+                        <div class="exercise-item-description">${exercise.description}</div>
+                        <div class="exercise-item-benefits"><strong>${currentLanguage === 'en' ? 'Benefits:' : currentLanguage === 'hi' ? 'लाभ:' : currentLanguage === 'ar' ? 'الفوائد:' : 'فوائد:'}</strong> ${exercise.benefits}</div>
+                    `;
+                    exerciseList.appendChild(exerciseItem);
+                });
+
+            } catch (error) {
+                console.error('Error fetching exercise recommendations:', error);
+                
+                // Fallback exercises by language
+                const fallbackData = {
+                    en: {
+                        intro: `At ${weeks} weeks, gentle exercise is beneficial for both you and your baby. Here are some safe activities recommended for this stage of pregnancy.`,
+                        exercises: [
+                            { emoji: '🚶‍♀️', name: 'Walking', description: 'Walk at a comfortable pace for 20-30 minutes daily.', benefits: 'Improves circulation, maintains fitness, and is safe throughout pregnancy.' },
+                            { emoji: '🧘‍♀️', name: 'Prenatal Yoga', description: 'Gentle stretches and breathing exercises designed for pregnancy.', benefits: 'Reduces stress, improves flexibility, and helps with breathing during labor.' },
+                            { emoji: '🏊‍♀️', name: 'Swimming', description: 'Swim or do water aerobics in a comfortable temperature pool.', benefits: 'Low-impact exercise that supports your weight and reduces swelling.' },
+                            { emoji: '💪', name: 'Pelvic Floor Exercises', description: 'Practice Kegel exercises by tightening pelvic muscles for 5-10 seconds.', benefits: 'Strengthens muscles for labor and recovery, prevents incontinence.' }
+                        ]
+                    },
+                    hi: {
+                        intro: `${weeks} सप्ताह में, हल्का व्यायाम आपके और आपके बच्चे दोनों के लिए लाभदायक है। यहां गर्भावस्था के इस चरण के लिए कुछ सुरक्षित गतिविधियां दी गई हैं।`,
+                        exercises: [
+                            { emoji: '🚶‍♀️', name: 'चलना', description: 'आरामदायक गति से प्रतिदिन 20-30 मिनट चलें।', benefits: 'रक्त संचार में सुधार, फिटनेस बनाए रखना, और पूरी गर्भावस्था में सुरक्षित।' },
+                            { emoji: '🧘‍♀️', name: 'प्रसव पूर्व योग', description: 'गर्भावस्था के लिए डिज़ाइन किए गए कोमल खिंचाव और श्वास व्यायाम।', benefits: 'तनाव कम करता है, लचीलापन बढ़ाता है, और प्रसव के दौरान श्वास में मदद करता है।' },
+                            { emoji: '🏊‍♀️', name: 'तैराकी', description: 'आरामदायक तापमान वाले पूल में तैराकी या वाटर एरोबिक्स करें।', benefits: 'कम प्रभाव वाला व्यायाम जो आपके वजन का समर्थन करता है और सूजन कम करता है।' },
+                            { emoji: '💪', name: 'पेल्विक फ्लोर व्यायाम', description: 'श्रोणि की मांसपेशियों को 5-10 सेकंड के लिए कसकर केगेल व्यायाम का अभ्यास करें।', benefits: 'प्रसव और रिकवरी के लिए मांसपेशियों को मजबूत करता है, असंयम को रोकता है।' }
+                        ]
+                    },
+                    ar: {
+                        intro: `في الأسبوع ${weeks}، التمارين اللطيفة مفيدة لك ولطفلك. إليك بعض الأنشطة الآمنة الموصى بها لهذه المرحلة من الحمل.`,
+                        exercises: [
+                            { emoji: '🚶‍♀️', name: 'المشي', description: 'امشي بوتيرة مريحة لمدة 20-30 دقيقة يومياً.', benefits: 'يحسن الدورة الدموية، يحافظ على اللياقة، وآمن طوال فترة الحمل.' },
+                            { emoji: '🧘‍♀️', name: 'يوغا ما قبل الولادة', description: 'تمارين التمدد اللطيفة والتنفس المصممة للحمل.', benefits: 'يقلل التوتر، يحسن المرونة، ويساعد في التنفس أثناء المخاض.' },
+                            { emoji: '🏊‍♀️', name: 'السباحة', description: 'اسبحي أو مارسي التمارين المائية في مسبح بدرجة حرارة مريحة.', benefits: 'تمرين منخفض التأثير يدعم وزنك ويقلل التورم.' },
+                            { emoji: '💪', name: 'تمارين قاع الحوض', description: 'مارسي تمارين كيجل من خلال شد عضلات الحوض لمدة 5-10 ثوانٍ.', benefits: 'يقوي العضلات للمخاض والتعافي، يمنع سلس البول.' }
+                        ]
+                    },
+                    ur: {
+                        intro: `${weeks} ہفتے میں، ہلکی ورزش آپ اور آپ کے بچے دونوں کے لیے فائدہ مند ہے۔ یہاں حمل کے اس مرحلے کے لیے کچھ محفوظ سرگرمیاں ہیں۔`,
+                        exercises: [
+                            { emoji: '🚶‍♀️', name: 'چلنا', description: 'روزانہ 20-30 منٹ آرام دہ رفتار سے چلیں۔', benefits: 'خون کی گردش بہتر بناتا ہے، تندرستی برقرار رکھتا ہے، اور پوری حمل میں محفوظ ہے۔' },
+                            { emoji: '🧘‍♀️', name: 'زچگی سے پہلے یوگا', description: 'حمل کے لیے ڈیزائن کیے گئے نرم کھینچاؤ اور سانس کی مشقیں۔', benefits: 'تناؤ کم کرتا ہے، لچک بڑھاتا ہے، اور زچگی کے دوران سانس لینے میں مدد کرتا ہے۔' },
+                            { emoji: '🏊‍♀️', name: 'تیراکی', description: 'آرام دہ درجہ حرارت والے پول میں تیراکی یا واٹر ایروبکس کریں۔', benefits: 'کم اثر والی ورزش جو آپ کے وزن کو سہارا دیتی ہے اور سوجن کم کرتی ہے۔' },
+                            { emoji: '💪', name: 'پیلوک فلور ورزشیں', description: 'شرونی کے پٹھوں کو 5-10 سیکنڈ تک سخت کرکے کیگل ورزش کی مشق کریں۔', benefits: 'زچگی اور بحالی کے لیے پٹھوں کو مضبوط بناتا ہے، پیشاب کی بے ضابطگی سے بچاتا ہے۔' }
+                        ]
+                    }
+                };
+
+                const fallback = fallbackData[currentLanguage];
+                exerciseIntro.textContent = fallback.intro;
+                
+                exerciseList.innerHTML = '';
+                fallback.exercises.forEach(exercise => {
+                    const exerciseItem = document.createElement('div');
+                    exerciseItem.className = 'exercise-item';
+                    exerciseItem.innerHTML = `
+                        <div class="exercise-item-title">
+                            <span>${exercise.emoji}</span>
+                            <span>${exercise.name}</span>
+                        </div>
+                        <div class="exercise-item-description">${exercise.description}</div>
+                        <div class="exercise-item-benefits"><strong>${currentLanguage === 'en' ? 'Benefits:' : currentLanguage === 'hi' ? 'लाभ:' : currentLanguage === 'ar' ? 'الفوائد:' : 'فوائد:'}</strong> ${exercise.benefits}</div>
+                    `;
+                    exerciseList.appendChild(exerciseItem);
+                });
+            }
+        }
+
+        // Language Translation System
+        const translations = {
+            en: {
+                flag: '🇬🇧',
+                name: 'English',
+                dir: 'ltr',
+                title: 'Calculate Pregnancy Week',
+                subtitle: 'Track your pregnancy journey with ease',
+                lmpLabel: 'First day of Last Menstrual Period (LMP) Date',
+                selectDate: 'Select date',
+                dayLabel: 'Day',
+                monthLabel: 'Month',
+                yearLabel: 'Year',
+                cancel: 'Cancel',
+                confirm: 'Confirm',
+                calculateBtn: 'Calculate Pregnancy Week',
+                resultsTitle: 'Your Pregnancy Details',
+                pregnancyProgress: 'Pregnancy Progress',
+                totalDays: 'Days Pregnant',
+                trimester: 'Trimester',
+                dueDate: 'Estimated Due Date',
+                babyDevelopmentTitle: 'Your Baby\'s Development',
+                aiPowered: 'AI-Powered Insights',
+                length: 'Length',
+                weight: 'Weight',
+                keyDevelopments: 'Key Developments:',
+                week: 'Week',
+                weeks: 'weeks',
+                day: 'day',
+                days: 'days',
+                first: 'First',
+                second: 'Second',
+                third: 'Third',
+                noteTitle: 'Note:',
+                noteText: 'Pregnancy is calculated from the first day of your last menstrual period. A typical pregnancy lasts about 40 weeks (280 days). This calculator provides an estimate and should not replace medical advice.',
+                errorNoDate: 'Please select your Last Menstrual Period date.',
+                errorFutureDate: 'The LMP date cannot be in the future.',
+                errorTooLong: 'The date entered suggests a pregnancy duration beyond typical term. Please verify your LMP date.',
+                errorFillAll: 'Please fill in all date fields',
+                errorInvalidMonth: 'Please select a valid month',
+                errorInvalidDay: 'Please enter a valid day (1-31)',
+                errorInvalidYear: 'Please enter a valid year',
+                errorInvalidDate: 'Please enter a valid date',
+                loading: 'Generating personalized insights...',
+                loadingDetails: 'Creating your baby\'s development details...',
+                months: ['Select', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+                selectLmpDate: 'Select LMP Date',
+                exerciseTitle: 'Recommended Exercises',
+                exerciseWarningTitle: '⚠️ Important:',
+                exerciseWarningText: 'Always consult with your healthcare provider before starting any exercise routine during pregnancy. Stop immediately if you experience pain, dizziness, or unusual symptoms.'
+            },
+            hi: {
+                flag: '🇮🇳',
+                name: 'हिंदी',
+                dir: 'ltr',
+                title: 'गर्भावस्था सप्ताह की गणना करें',
+                subtitle: 'अपनी गर्भावस्था यात्रा को आसानी से ट्रैक करें',
+                lmpLabel: 'अंतिम मासिक धर्म (एलएमपी) का पहला दिन',
+                selectDate: 'तिथि चुनें',
+                dayLabel: 'दिन',
+                monthLabel: 'महीना',
+                yearLabel: 'वर्ष',
+                cancel: 'रद्द करें',
+                confirm: 'पुष्टि करें',
+                calculateBtn: 'गर्भावस्था सप्ताह की गणना करें',
+                resultsTitle: 'आपकी गर्भावस्था का विवरण',
+                pregnancyProgress: 'गर्भावस्था की प्रगति',
+                totalDays: 'कुल दिन गर्भवती',
+                trimester: 'तिमाही',
+                dueDate: 'अनुमानित नियत तिथि',
+                babyDevelopmentTitle: 'आपके बच्चे का विकास',
+                aiPowered: 'एआई-संचालित जानकारी',
+                length: 'लंबाई',
+                weight: 'वजन',
+                keyDevelopments: 'मुख्य विकास:',
+                week: 'सप्ताह',
+                weeks: 'सप्ताह',
+                day: 'दिन',
+                days: 'दिन',
+                first: 'पहली',
+                second: 'दूसरी',
+                third: 'तीसरी',
+                noteTitle: 'नोट:',
+                noteText: 'गर्भावस्था की गणना आपके अंतिम मासिक धर्म के पहले दिन से की जाती है। एक सामान्य गर्भावस्था लगभग 40 सप्ताह (280 दिन) तक चलती है। यह कैलकुलेटर एक अनुमान प्रदान करता है और चिकित्सा सलाह की जगह नहीं ले सकता।',
+                errorNoDate: 'कृपया अपनी अंतिम मासिक धर्म की तिथि चुनें।',
+                errorFutureDate: 'एलएमपी तिथि भविष्य में नहीं हो सकती।',
+                errorTooLong: 'दर्ज की गई तिथि सामान्य अवधि से अधिक गर्भावस्था की अवधि का सुझाव देती है। कृपया अपनी एलएमपी तिथि सत्यापित करें।',
+                errorFillAll: 'कृपया सभी तिथि फ़ील्ड भरें',
+                errorInvalidMonth: 'कृपया एक मान्य महीना चुनें',
+                errorInvalidDay: 'कृपया एक मान्य दिन दर्ज करें (1-31)',
+                errorInvalidYear: 'कृपया एक मान्य वर्ष दर्ज करें',
+                errorInvalidDate: 'कृपया एक मान्य तिथि दर्ज करें',
+                loading: 'व्यक्तिगत जानकारी तैयार की जा रही है...',
+                loadingDetails: 'आपके बच्चे के विकास का विवरण बनाया जा रहा है...',
+                months: ['चुनें', 'जन', 'फर', 'मार', 'अप्र', 'मई', 'जून', 'जुल', 'अग', 'सित', 'अक्टू', 'नव', 'दिस'],
+                selectLmpDate: 'एलएमपी तिथि चुनें',
+                exerciseTitle: 'अनुशंसित व्यायाम',
+                exerciseWarningTitle: '⚠️ महत्वपूर्ण:',
+                exerciseWarningText: 'गर्भावस्था के दौरान कोई भी व्यायाम शुरू करने से पहले हमेशा अपने स्वास्थ्य सेवा प्रदाता से परामर्श लें। यदि आपको दर्द, चक्कर आना, या असामान्य लक्षण महसूस हों तो तुरंत रुक जाएं।'
+            },
+            ar: {
+                flag: '🇸🇦',
+                name: 'العربية',
+                dir: 'rtl',
+                title: 'حساب أسبوع الحمل',
+                subtitle: 'تتبع رحلة حملك بسهولة',
+                lmpLabel: 'اليوم الأول من آخر دورة شهرية',
+                selectDate: 'اختر التاريخ',
+                dayLabel: 'يوم',
+                monthLabel: 'شهر',
+                yearLabel: 'سنة',
+                cancel: 'إلغاء',
+                confirm: 'تأكيد',
+                calculateBtn: 'احسب أسبوع الحمل',
+                resultsTitle: 'تفاصيل حملك',
+                pregnancyProgress: 'تقدم الحمل',
+                totalDays: 'أيام الحمل',
+                trimester: 'الثلث',
+                dueDate: 'تاريخ الولادة المتوقع',
+                babyDevelopmentTitle: 'نمو طفلك',
+                aiPowered: 'رؤى مدعومة بالذكاء الاصطناعي',
+                length: 'الطول',
+                weight: 'الوزن',
+                keyDevelopments: 'التطورات الرئيسية:',
+                week: 'أسبوع',
+                weeks: 'أسابيع',
+                day: 'يوم',
+                days: 'أيام',
+                first: 'الأول',
+                second: 'الثاني',
+                third: 'الثالث',
+                noteTitle: 'ملاحظة:',
+                noteText: 'يتم حساب الحمل من اليوم الأول من آخر دورة شهرية. يستمر الحمل النموذجي حوالي 40 أسبوعًا (280 يومًا). توفر هذه الآلة الحاسبة تقديرًا ولا ينبغي أن تحل محل المشورة الطبية.',
+                errorNoDate: 'الرجاء اختيار تاريخ آخر دورة شهرية.',
+                errorFutureDate: 'لا يمكن أن يكون تاريخ آخر دورة شهرية في المستقبل.',
+                errorTooLong: 'يشير التاريخ المدخل إلى مدة حمل تتجاوز المدة النموذجية. يرجى التحقق من تاريخ آخر دورة شهرية.',
+                errorFillAll: 'يرجى ملء جميع حقول التاريخ',
+                errorInvalidMonth: 'يرجى اختيار شهر صالح',
+                errorInvalidDay: 'يرجى إدخال يوم صالح (1-31)',
+                errorInvalidYear: 'يرجى إدخال سنة صالحة',
+                errorInvalidDate: 'يرجى إدخال تاريخ صالح',
+                loading: 'جارٍ إنشاء رؤى مخصصة...',
+                loadingDetails: 'جارٍ إنشاء تفاصيل نمو طفلك...',
+                months: ['اختر', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                selectLmpDate: 'اختر تاريخ آخر دورة شهرية',
+                exerciseTitle: 'التمارين الموصى بها',
+                exerciseWarningTitle: '⚠️ مهم:',
+                exerciseWarningText: 'استشيري دائمًا مقدم الرعاية الصحية قبل البدء بأي روتين تمارين أثناء الحمل. توقفي فورًا إذا شعرت بألم أو دوار أو أعراض غير عادية.'
+            },
+            ur: {
+                flag: '🇵🇰',
+                name: 'اردو',
+                dir: 'rtl',
+                title: 'حمل کا ہفتہ شمار کریں',
+                subtitle: 'اپنے حمل کے سفر کو آسانی سے ٹریک کریں',
+                lmpLabel: 'آخری ماہواری کا پہلا دن',
+                selectDate: 'تاریخ منتخب کریں',
+                dayLabel: 'دن',
+                monthLabel: 'مہینہ',
+                yearLabel: 'سال',
+                cancel: 'منسوخ کریں',
+                confirm: 'تصدیق کریں',
+                calculateBtn: 'حمل کا ہفتہ شمار کریں',
+                resultsTitle: 'آپ کے حمل کی تفصیلات',
+                pregnancyProgress: 'حمل کی پیشرفت',
+                totalDays: 'کل دن حاملہ',
+                trimester: 'تین ماہ',
+                dueDate: 'متوقع پیدائش کی تاریخ',
+                babyDevelopmentTitle: 'آپ کے بچے کی نشوونما',
+                aiPowered: 'AI سے چلنے والی معلومات',
+                length: 'لمبائی',
+                weight: 'وزن',
+                keyDevelopments: 'اہم پیشرفت:',
+                week: 'ہفتہ',
+                weeks: 'ہفتے',
+                day: 'دن',
+                days: 'دن',
+                first: 'پہلا',
+                second: 'دوسرا',
+                third: 'تیسرا',
+                noteTitle: 'نوٹ:',
+                noteText: 'حمل کا حساب آپ کی آخری ماہواری کے پہلے دن سے لگایا جاتا ہے۔ ایک عام حمل تقریباً 40 ہفتے (280 دن) تک رہتا ہے۔ یہ کیلکولیٹر ایک تخمینہ فراہم کرتا ہے اور طبی مشورے کی جگہ نہیں لے سکتا۔',
+                errorNoDate: 'براہ کرم اپنی آخری ماہواری کی تاریخ منتخب کریں۔',
+                errorFutureDate: 'آخری ماہواری کی تاریخ مستقبل میں نہیں ہو سکتی۔',
+                errorTooLong: 'درج کی گئی تاریخ عام مدت سے زیادہ حمل کی مدت کی تجویز دیتی ہے۔ براہ کرم اپنی آخری ماہواری کی تاریخ کی تصدیق کریں۔',
+                errorFillAll: 'براہ کرم تمام تاریخ کے خانے بھریں',
+                errorInvalidMonth: 'براہ کرم ایک درست مہینہ منتخب کریں',
+                errorInvalidDay: 'براہ کرم ایک درست دن درج کریں (1-31)',
+                errorInvalidYear: 'براہ کرم ایک درست سال درج کریں',
+                errorInvalidDate: 'براہ کرم ایک درست تاریخ درج کریں',
+                loading: 'ذاتی معلومات تیار کی جا رہی ہیں...',
+                loadingDetails: 'آپ کے بچے کی نشوونما کی تفصیلات بنائی جا رہی ہیں...',
+                months: ['منتخب کریں', 'جنوری', 'فروری', 'مارچ', 'اپریل', 'مئی', 'جون', 'جولائی', 'اگست', 'ستمبر', 'اکتوبر', 'نومبر', 'دسمبر'],
+                selectLmpDate: 'آخری ماہواری کی تاریخ منتخب کریں',
+                exerciseTitle: 'تجویز کردہ ورزشیں',
+                exerciseWarningTitle: '⚠️ اہم:',
+                exerciseWarningText: 'حمل کے دوران کوئی بھی ورزش شروع کرنے سے پہلے ہمیشہ اپنے صحت کی دیکھ بھال فراہم کرنے والے سے مشورہ کریں۔ اگر آپ کو درد، چکر آنا، یا غیر معمولی علامات محسوس ہوں تو فوری طور پر رک جائیں۔'
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const selector = document.querySelector('.language-selector');
+            if (selector && !selector.contains(event.target)) {
+                document.getElementById('languageDropdown').classList.remove('show');
+            }
+        });
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            // Update direction
+            document.documentElement.setAttribute('dir', t.dir);
+            document.body.setAttribute('dir', t.dir);
+            
+            // Update language selector
+            document.getElementById('currentLangFlag').textContent = t.flag;
+            document.getElementById('currentLangName').textContent = t.name;
+            
+            // Update active state based on language
+            document.querySelectorAll('.language-option').forEach((opt, index) => {
+                opt.classList.remove('active');
+                const langs = ['en', 'hi', 'ar', 'ur'];
+                if (langs[index] === lang) {
+                    opt.classList.add('active');
+                }
+            });
+            
+            // Close dropdown
+            document.getElementById('languageDropdown').classList.remove('show');
+            
+            // Update all text content
+            document.querySelector('h1').textContent = t.title;
+            document.querySelector('.subtitle').textContent = t.subtitle;
+            document.querySelector('label[for="lmp-date"]').textContent = t.lmpLabel;
+            document.getElementById('dateDisplay').textContent = t.selectDate;
+            document.querySelector('.calculate-btn').textContent = t.calculateBtn;
+            
+            // Update date picker labels
+            document.querySelectorAll('.date-input-label')[0].textContent = t.dayLabel;
+            document.querySelectorAll('.date-input-label')[1].textContent = t.monthLabel;
+            document.querySelectorAll('.date-input-label')[2].textContent = t.yearLabel;
+            document.querySelector('.date-picker-btn.cancel').textContent = t.cancel;
+            document.querySelector('.date-picker-btn.confirm').textContent = t.confirm;
+            document.querySelector('.date-picker-header h3').textContent = t.selectLmpDate;
+            
+            // Reorder date inputs for RTL languages (Day, Month, Year from right to left)
+            const dateInputGroup = document.getElementById('dateInputGroup');
+            const dayWrapper = document.getElementById('dayWrapper');
+            const monthWrapper = document.getElementById('monthWrapper');
+            const yearWrapper = document.getElementById('yearWrapper');
+            
+            if (t.dir === 'rtl') {
+                // For RTL: Year, Month, Day (so they appear as Day, Month, Year from right to left)
+                dateInputGroup.innerHTML = '';
+                dateInputGroup.appendChild(yearWrapper);
+                dateInputGroup.appendChild(monthWrapper);
+                dateInputGroup.appendChild(dayWrapper);
+            } else {
+                // For LTR: Day, Month, Year (normal order)
+                dateInputGroup.innerHTML = '';
+                dateInputGroup.appendChild(dayWrapper);
+                dateInputGroup.appendChild(monthWrapper);
+                dateInputGroup.appendChild(yearWrapper);
+            }
+            
+            // Update labels after reordering
+            document.getElementById('dayLabel').textContent = t.dayLabel;
+            document.getElementById('monthLabel').textContent = t.monthLabel;
+            document.getElementById('yearLabel').textContent = t.yearLabel;
+            
+            // Update month options
+            const monthSelect = document.getElementById('monthInput');
+            monthSelect.innerHTML = '';
+            t.months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index === 0 ? '' : index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+            
+            // Update results section
+            document.querySelector('.result-title').textContent = t.resultsTitle;
+            document.querySelectorAll('.result-label')[0].textContent = t.pregnancyProgress;
+            document.querySelectorAll('.result-label')[1].textContent = t.totalDays;
+            document.querySelectorAll('.result-label')[2].textContent = t.trimester;
+            document.querySelectorAll('.result-label')[3].textContent = t.dueDate;
+            
+            // Update baby growth section
+            document.querySelector('.baby-growth-title').textContent = t.babyDevelopmentTitle;
+            document.querySelector('.ai-badge span:last-child').textContent = t.aiPowered;
+            document.querySelectorAll('.size-label')[0].textContent = t.length;
+            document.querySelectorAll('.size-label')[1].textContent = t.weight;
+            document.getElementById('keyDevelopmentsLabel').textContent = t.keyDevelopments;
+            
+            // Update exercise section
+            document.getElementById('exerciseTitle').textContent = t.exerciseTitle;
+            document.getElementById('exerciseWarningTitle').textContent = t.exerciseWarningTitle;
+            document.getElementById('exerciseWarningText').textContent = t.exerciseWarningText;
+            
+            // Update info text
+            const infoText = document.querySelector('.info-text');
+            infoText.innerHTML = `<strong>${t.noteTitle}</strong> ${t.noteText}`;
+        }
+
+        // Initialize with English
+        window.addEventListener('DOMContentLoaded', function() {
+            changeLanguage('en');
+        });
+    </script>
+</body>
+</html>
