@@ -35,11 +35,7 @@ Support for 4 languages with complete translations:
 - **RTL Support**: Proper right-to-left layout for Arabic and Urdu
 - **Custom Components**: Beautiful date picker, cards, and interactive elements
 
-## 🚀 Live Demo
 
-[View Live Demo](#) <!-- Add your GitHub Pages URL here -->
-
-## 📸 Screenshots
 
 ### English Interface
 <!-- Add screenshot here -->
